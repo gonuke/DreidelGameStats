@@ -8,27 +8,23 @@ def stat_summary(round_stats):
 
     stats = {'mean' : np.mean(round_stats),
              'min' : np.min(round_stats),
-             'p10' : int(np.percentile(round_stats,10)),
-             'p25' : int(np.percentile(round_stats,25)),
-             'p50' : int(np.percentile(round_stats,50)),
-             'p75' : int(np.percentile(round_stats,75)),
-             'p90' : int(np.percentile(round_stats,90)),
              'max' : np.max(round_stats)}
+    for percentile in (10,25,50,75,90):
+        stats[percentile] = int(np.percentile(round_stats,percentile))
 
     return stats
 
 def report_stats(num_players, num_coins, round_stats):
     stats = stat_summary(round_stats)
-    plt.hist(round_stats)
+
+    percentile_range = "{0}% of all games will between {1} and {2} rounds\n"
     summary  = "When playing with {0} players that each start with {1} coins,\n".format(num_players, num_coins)
-    summary += "the average number of rounds is {0}, \n".format(stats['mean'])
-    percentile = 10
-    summary += "the shortest game took {0} rounds\n".format(stats['min'])
-    summary += "{0}% of all games will take fewer than {1} or more than {2} rounds,\n".format(percentile, stats['p10'], stats['p90'])
-    percentile = 25
-    summary += "{0}% of all games will take fewer than {1} or more than {2} rounds,\n".format(percentile, stats['p25'], stats['p75'])
-    summary += "the median number of rounds is {0}, \n".format(stats['p50'])
-    summary += "the longest game took {0} rounds, and\n".format(stats['max'])
+    summary += " * the average number of rounds is {0}, \n".format(stats['mean'])
+    summary += " * the median number of rounds is {0}, \n".format(stats[50])
+    summary += " * the shortest game took {0} rounds\n".format(stats['min'])
+    summary += " * the longest game took {0} rounds\n".format(stats['max'])
+    for percentile in (10,25):
+        summary += percentile_range.format(100-2*percentile, stats[percentile], stats[100 - percentile])
     return summary
 
 def record_stats(stat_table, num_players, num_coins, round_stats):
@@ -39,7 +35,7 @@ def record_stats(stat_table, num_players, num_coins, round_stats):
     else:
         return np.vstack([stat_table,stats])
 
-num_trials = 1000
+num_trials = 10000
 
 def collect_all_stats(max_players, max_coins):
 
@@ -63,7 +59,13 @@ def run_trials(num_players, num_coins, num_trials):
 
     return round_stats.max(axis=1)
 
-print(report_stats(4,5,run_trials(4,5,num_trials)))
+num_players = 4
+num_coins = 3
+one_case_results = run_trials(num_players,num_coins,num_trials)
+print(report_stats(num_players,num_coins,one_case_results))
+plt.clf()
+plt.hist(one_case_results,bins=30)
+plt.show()
 
 #print(collect_all_stats(5,5))
 
