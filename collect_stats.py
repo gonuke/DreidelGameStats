@@ -35,7 +35,7 @@ def record_stats(stat_table, num_players, num_coins, round_stats):
     else:
         return np.vstack([stat_table,stats])
 
-num_trials = 50000
+num_trials = 10000
 
 def collect_all_stats(max_players, max_coins):
 
@@ -60,9 +60,9 @@ def run_trials(num_players, num_coins, num_trials):
     return round_stats.max(axis=1)
 
 num_players = 4
-num_coints = 5
-one_case_results = run_trials(4,5,num_trials)
-print(report_stats(4,5,one_case_results))
+num_coins = 3
+one_case_results = run_trials(num_players,num_coins,num_trials)
+print(report_stats(num_players,num_coins,one_case_results))
 plt.clf()
 plt.hist(one_case_results,bins=30)
 plt.show()
