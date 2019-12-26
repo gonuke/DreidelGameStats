@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 25 08:49:28 2019
-
-@author: laurie
-"""
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
@@ -35,7 +29,7 @@ def report_stats(num_players, num_coins, round_stats):
     summary += "{0}% of all games will take fewer than {1} or more than {2} rounds,\n".format(percentile, stats['p25'], stats['p75'])
     summary += "the median number of rounds is {0}, \n".format(stats['p50'])
     summary += "the longest game took {0} rounds, and\n".format(stats['max'])
-    print(summary)
+    return summary
 
 def record_stats(stat_table, num_players, num_coins, round_stats):
     stats = [num_players, num_coins]
@@ -47,18 +41,32 @@ def record_stats(stat_table, num_players, num_coins, round_stats):
 
 num_trials = 1000
 
-all_stats = None
+def collect_all_stats(max_players, max_coins):
 
-for num_players in tqdm([2,3,4,5]):
-    for num_coins in [3,4,5]:
-        for trial in range(num_trials):
-            game = Dreidel.Dreidel(num_players, num_coins)
-            game.play_game()
-            if trial == 0:
-                round_stats = np.array(game.exit_round)
-            else:
-                round_stats = np.vstack([round_stats,game.exit_round])
+    all_stats = None
 
-        round_stats = round_stats.max(axis=1)
-        all_stats = record_stats(all_stats, num_players, num_coins, round_stats)
+    for num_players in range(2,max_players+1):
+        for num_coins in range(2,max_coins+1):
+            round_stats = run_trials(num_players, num_coins, num_trials)
+            all_stats = record_stats(all_stats, num_players, num_coins, round_stats)
+
+    return all_stats
+        
+def run_trials(num_players, num_coins, num_trials):
+    for trial in tqdm(range(num_trials)):
+        game = Dreidel.Dreidel(num_players, num_coins)
+        game.play_game()
+        if trial == 0:
+            round_stats = np.array(game.exit_round)
+        else:
+            round_stats = np.vstack([round_stats,game.exit_round])
+
+    return round_stats.max(axis=1)
+
+print(report_stats(4,5,run_trials(4,5,num_trials)))
+
+#print(collect_all_stats(5,5))
+
+
+
 
